@@ -1,5 +1,21 @@
+
 let calculator = {
-  // ваш код
+  read(a, b) {
+    if (a === undefined) {
+      a = +prompt('Введите первое число', '');
+    }
+    if (b === undefined) {
+      b = +prompt('Введите второе число', '');
+    }
+    this.a = a;
+    this.b = b;
+  },
+  sum() {
+    return (this.a + this.b);
+  },
+  mul() {
+    return this.a * this.b;
+  },
 };
 
 // НЕ УДАЛЯТЬ СТРОКУ, НУЖНА ДЛЯ ПРОВЕРКИ
