@@ -1,7 +1,7 @@
 function camelize(str) {
 	const array = str.split('-');
 
-	let newValueStr = array.map(function (word, index) {
+	let newValueArr = array.map(function (word, index) {
 		if (index == 0) {
 			return word;
 		} else {
@@ -9,8 +9,8 @@ function camelize(str) {
 		}
 	})
 
-	let newValueArr = newValueStr.join('');
-	return newValueArr;
+	let newValueStr = newValueArr.join('');
+	return newValueStr;
 }
 
 camelize('background-color') == 'backgroundColor';
