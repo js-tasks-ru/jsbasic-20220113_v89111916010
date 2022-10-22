@@ -3,112 +3,100 @@ import createElement from "../../assets/lib/create-element.js";
 export default class Carousel {
   constructor(slides) {
     this.slides = slides;
-    this.elem = this._createBody();
-    this._buildSlides();
 
-    this._initCarousel();
+    this.currentSlideNumber = 0;
+    this.render();
+    this.addEventListeners();
   }
 
-  _initCarousel() {
-    let currentSlideNumber = 0;
-    let slidesAmount = this.slides.length;
-    let elem = this.elem;
+  render() {
+    this.elem = createElement(`
+        <div class="carousel">
+          <div class="carousel__arrow carousel__arrow_right">
+            <img src="/assets/images/icons/angle-icon.svg" alt="icon" />
+          </div>
+          <div class="carousel__arrow carousel__arrow_left">
+            <img src="/assets/images/icons/angle-left-icon.svg" alt="icon" />
+          </div>
+          <div class="carousel__inner"></div>
+        </div>
+        `);
 
-    let carouselInnerElem = elem.querySelector(".carousel__inner");
-    let carouselArrowRight = elem.querySelector(".carousel__arrow_right");
-    let carouselArrowLeft = elem.querySelector(".carousel__arrow_left");
+    let slides = this.slides.map((item) =>
+      createElement(`
+      <div class="carousel__slide" data-id="${item.id}">
+        <img
+          src="/assets/images/carousel/${item.image}"
+          class="carousel__img"
+          alt="slide"
+        />
+        <div class="carousel__caption">
+          <span class="carousel__price">€${item.price.toFixed(2)}</span>
+          <div class="carousel__title">${item.name}</div>
+          <button type="button" class="carousel__button">
+            <img src="/assets/images/icons/plus-icon.svg" alt="icon" />
+          </button>
+        </div>
+      </div>`)
+    );
 
-    update();
+    this.sub("inner").append(...slides);
 
-    elem.onclick = ({ target }) => {
+    this.update();
+  }
+
+  addEventListeners() {
+    this.elem.onclick = ({ target }) => {
+      let button = target.closest(".carousel__button");
+      if (button) {
+        let id = target.closest("[data-id]").dataset.id;
+
+        this.elem.dispatchEvent(
+          new CustomEvent("product-add", {
+            detail: id,
+            bubbles: true,
+          })
+        );
+      }
+
       if (target.closest(".carousel__arrow_right")) {
-        next();
+        this.next();
       }
 
       if (target.closest(".carousel__arrow_left")) {
-        prev();
+        this.prev();
       }
     };
-
-    function next() {
-      currentSlideNumber++;
-      update();
-    }
-
-    function prev() {
-      currentSlideNumber--;
-      update();
-    }
-
-    function update() {
-      let offset = -carouselInnerElem.offsetWidth * currentSlideNumber;
-      carouselInnerElem.style.transform = `translateX(${offset}px)`;
-
-      if (currentSlideNumber == slidesAmount - 1) {
-        carouselArrowRight.style.display = "none";
-      } else {
-        carouselArrowRight.style.display = "";
-      }
-
-      if (currentSlideNumber == 0) {
-        carouselArrowLeft.style.display = "none";
-      } else {
-        carouselArrowLeft.style.display = "";
-      }
-    }
   }
 
-  _buildSlides() {
-    const slides = this.slides;
-    slides.forEach((el) => this._buildSlide(el));
+  sub(ref) {
+    return this.elem.querySelector(`.carousel__${ref}`);
   }
 
-  _createBody() {
-    let body = createElement(
-      `
-				<div class="carousel">
-					<div class="carousel__arrow carousel__arrow_right">
-						<img src="/assets/images/icons/angle-icon.svg" alt="icon">
-					</div>
-					<div class="carousel__arrow carousel__arrow_left">
-						<img src="/assets/images/icons/angle-left-icon.svg" alt="icon">
-					</div>
-
-					<div class="carousel__inner">
-					</div>
-				</div>
-			`
-    );
-    return body;
+  next() {
+    this.currentSlideNumber++;
+    this.update();
   }
 
-  _buildSlide({ id, image, price, name }) {
-    const viewPrice = price.toFixed(2);
-    const slide = createElement(
-      `
-				<div class="carousel__slide" data-id="${id}">
-					<img src="/assets/images/carousel/${image}" class="carousel__img" alt="slide">
-					<div class="carousel__caption">
-						<span class="carousel__price">€${viewPrice}</span>
-						<div class="carousel__title">${name}</div>
-						<button type="button" class="carousel__button">
-							<img src="/assets/images/icons/plus-icon.svg" alt="icon">
-						</button>
-					</div>
-				</div>
-			`
-    );
-    const elem = this.elem;
+  prev() {
+    this.currentSlideNumber--;
+    this.update();
+  }
 
-    const button = slide.querySelector(".carousel__button");
-    button.addEventListener("click", () => {
-      const BuyClickEvent = new CustomEvent("product-add", {
-        detail: id,
-        bubbles: true,
-      });
-      elem.dispatchEvent(BuyClickEvent);
-    });
+  update() {
+    let offset = -this.elem.offsetWidth * this.currentSlideNumber;
+    this.sub("inner").style.transform = `translateX(${offset}px)`;
 
-    elem.querySelector(".carousel__inner").append(slide);
+    if (this.currentSlideNumber == this.slides.length - 1) {
+      this.sub("arrow_right").style.display = "none";
+    } else {
+      this.sub("arrow_right").style.display = "";
+    }
+
+    if (this.currentSlideNumber == 0) {
+      this.sub("arrow_left").style.display = "none";
+    } else {
+      this.sub("arrow_left").style.display = "";
+    }
   }
 }
