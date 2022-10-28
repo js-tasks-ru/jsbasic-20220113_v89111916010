@@ -1,105 +1,67 @@
+import createElement from "../../assets/lib/create-element.js";
+
 export default class StepSlider {
   constructor({ steps, value = 0 }) {
-    this._render(value);
-    this._steps(steps);
-    this._eventListener(steps, value);
-    this._load(steps, value);
+    this.steps = steps;
+    this.segments = steps - 1;
+    this.render();
+
+    this.addEventListeners();
+
+    this.setValue(value);
   }
 
-  _render(value) {
-    this.elem = this._createElement(
-      `
-      <!--Корневой элемент слайдера-->
+  render() {
+    this.elem = createElement(`
       <div class="slider">
-    
-        <!--Ползунок слайдера с активным значением-->
         <div class="slider__thumb">
-          <span class="slider__value">${value}</span>
+          <span class="slider__value"></span>
         </div>
-    
-        <!--Заполненная часть слайдера-->
         <div class="slider__progress"></div>
-    
-        <!--Шаги слайдера-->
         <div class="slider__steps">
+          ${"<span></span>".repeat(this.steps)}
         </div>
       </div>
-      `
-    );
+    `);
   }
 
-  _steps(steps) {
-    let elements = "";
-    for (let i = 0; i < steps; i++) {
-      elements += "<span></span>";
+  setValue(value) {
+    this.value = value;
+
+    let valuePercents = (value / this.segments) * 100;
+
+    this.sub("thumb").style.left = `${valuePercents}%`;
+    this.sub("progress").style.width = `${valuePercents}%`;
+
+    this.sub("value").innerHTML = value;
+
+    if (this.sub("step-active")) {
+      this.sub("step-active").classList.remove("slider__step-active");
     }
-    this.elem
-      .querySelector(".slider__steps")
-      .insertAdjacentHTML("beforeend", elements);
+
+    this.sub("steps").children[this.value].classList.add("slider__step-active");
   }
 
-  _eventListener(steps, value) {
-    this.elem.onclick = (event) => {
-      let left = event.clientX - this.elem.getBoundingClientRect().left;
-      let leftRelative = left / this.elem.offsetWidth;
-      let segments = steps - 1;
-      let approximateValue = leftRelative * segments;
-      let value = Math.round(approximateValue);
-      let valuePercents = (value / segments) * 100;
-      this._update(value, valuePercents);
-      this._sliderChange(value);
-    };
+  addEventListeners() {
+    this.elem.onclick = this.onClick;
   }
 
-  _sliderChange(value) {
+  onClick = (event) => {
+    let newLeft =
+      (event.clientX - this.elem.getBoundingClientRect().left) /
+      this.elem.offsetWidth;
+
+    this.setValue(Math.round(this.segments * newLeft));
+
     this.elem.dispatchEvent(
       new CustomEvent("slider-change", {
-        detail: value,
+        detail: this.value,
         bubbles: true,
       })
     );
-  }
+  };
 
-  _valuePercents(steps, value) {
-    return (value / (steps - 1)) * 100;
-  }
-
-  _load(steps, value) {
-    const body = this.elem;
-    body.querySelector(".slider__value").innerHTML = value;
-    body
-      .querySelector(".slider__steps")
-      .querySelectorAll("span")
-      [value].classList.add("slider__step-active");
-    body.querySelector(".slider__thumb").style.left = `${this._valuePercents(
-      steps,
-      value
-    )}%`;
-    body.querySelector(
-      ".slider__progress"
-    ).style.width = `${this._valuePercents(steps, value)}%`;
-  }
-
-  _update(value, valuePercents) {
-    const body = this.elem;
-
-    body
-      .querySelector(".slider__steps")
-      .querySelectorAll("span.slider__step-active")
-      .forEach((elem) => {
-        elem.classList.remove("slider__step-active");
-      });
-    body
-      .querySelector(".slider__steps")
-      .querySelectorAll("span")
-      [value].classList.add("slider__step-active");
-    body.querySelector(".slider__thumb").style.left = `${valuePercents}%`;
-    body.querySelector(".slider__progress").style.width = `${valuePercents}%`;
-  }
-
-  _createElement(html) {
-    const div = document.createElement("div");
-    div.innerHTML = html;
-    return div.firstElementChild;
+  sub(ref) {
+    return this.elem.querySelector(`.slider__${ref}`);
   }
 }
