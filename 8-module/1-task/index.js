@@ -26,80 +26,63 @@ export default class CartIcon {
 
       this.updatePosition();
 
-      this.elem.classList.add("shake");
-      this.elem.addEventListener(
-        "transitionend",
-        () => {
-          this.elem.classList.remove("shake");
-        },
-        { once: true }
-      );
+      this.elem.classList.add('shake');
+      this.elem.addEventListener('transitionend', () => {
+        this.elem.classList.remove('shake');
+      }, {once: true});
+
     } else {
-      this.elem.classList.remove("cart-icon_visible");
+      this.elem.classList.remove('cart-icon_visible');
     }
+  }
+
+  updatePosition() {
+
+    if (!this.elem.offsetHeight) {return;} // not visible
+
+    if (!this.initialTopCoord) {
+      this.initialTopCoord = this.elem.getBoundingClientRect().top + window.pageYOffset;
+    }
+
+    if (document.documentElement.clientWidth <= 767) {
+      // mobile: cart is always fixed
+      this.resetPosition();
+      return;
+    }
+
+    let isHeaderCartScrolled = window.pageYOffset > this.initialTopCoord;
+
+    if (isHeaderCartScrolled) {
+      this.fixPosition();
+    } else {
+      this.resetPosition();
+    }
+  }
+
+  fixPosition() {
+    Object.assign(this.elem.style, {
+      position: 'fixed',
+      top: '50px',
+      zIndex: 1e3,
+      left: Math.min(
+        // справа от содержимого (определяем по первому контейнеру в нашей вёрстке)
+        document.querySelector('.container').getBoundingClientRect().right + 20,
+        document.documentElement.clientWidth - this.elem.offsetWidth - 10
+      ) + 'px'
+    });
+  }
+
+  resetPosition() {
+    Object.assign(this.elem.style, {
+      position: '',
+      top: '',
+      left: '',
+      zIndex: ''
+    });
   }
 
   addEventListeners() {
     document.addEventListener("scroll", () => this.updatePosition());
     window.addEventListener("resize", () => this.updatePosition());
-  }
-
-  updatePosition() {
-    if (this.elem.offsetWidth) {
-      this._defaultCartPosition();
-      this._checkCartVisible();
-      this._leftIndent();
-    }
-  }
-
-  _leftIndent() {
-    this.leftIndent =
-      Math.min(
-        document.querySelector(".container").getBoundingClientRect().right + 20,
-        document.documentElement.clientWidth - this.elem.offsetWidth - 10
-      ) + "px";
-  }
-
-  _defaultCartPosition() {
-    if (this.oneTime) {
-      this.initialTopCoord =
-        this.elem.getBoundingClientRect().top + window.pageYOffset;
-      this.oneTime = false;
-    }
-  }
-
-  _checkCartVisible() {
-    let actualLeftIndent = Math.round(this.elem.getBoundingClientRect().left);
-    let expectedLeftIndent = Math.round(document.querySelector('.container').getBoundingClientRect().right) + 20;
-    console.log('actualLeftIndent:', actualLeftIndent);
-    console.log('expectedLeftIndent:', expectedLeftIndent);
-    if (window.pageYOffset > this.initialTopCoord && document.documentElement.clientWidth >= 767) {
-      // плавающая корзина
-      console.log("плавающая корзина");
-      this._positionFixed();
-    } else {
-      // корзина сверху
-      console.log("корзина сверху");
-      this._positionDefault();
-    }
-  }
-
-  _positionFixed() {
-    Object.assign(this.elem.style, {
-      position: "fixed",
-      top: "50px",
-      zIndex: 1e3,
-      right: "10px",
-      left: this.leftIndent,
-    });
-  }
-
-  _positionDefault() {
-    Object.assign(this.elem.style, {
-      position: "",
-      top: "",
-      left: "",
-      zIndex: "",
-    });
   }
 }
