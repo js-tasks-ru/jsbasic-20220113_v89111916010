@@ -1,7 +1,6 @@
-import createElement from '../../assets/lib/create-element.js';
+import createElement from "../../assets/lib/create-element.js";
 
 export default class Carousel {
-
   constructor(slides) {
     this.slides = slides;
 
@@ -23,7 +22,8 @@ export default class Carousel {
         </div>
         `);
 
-    let slides = this.slides.map(item => createElement(`
+    let slides = this.slides.map((item) =>
+      createElement(`
       <div class="carousel__slide" data-id="${item.id}">
         <img
           src="/assets/images/carousel/${item.image}"
@@ -37,30 +37,33 @@ export default class Carousel {
             <img src="/assets/images/icons/plus-icon.svg" alt="icon" />
           </button>
         </div>
-      </div>`));
+      </div>`)
+    );
 
-    this.sub('inner').append(...slides);
+    this.sub("inner").append(...slides);
 
     this.update();
   }
 
   addEventListeners() {
-    this.elem.onclick = ({target}) => {
-      let button = target.closest('.carousel__button');
+    this.elem.onclick = ({ target }) => {
+      let button = target.closest(".carousel__button");
       if (button) {
-        let id = target.closest('[data-id]').dataset.id;
+        let id = target.closest("[data-id]").dataset.id;
 
-        this.elem.dispatchEvent(new CustomEvent('product-add', {
-          detail: id,
-          bubbles: true
-        }));
+        this.elem.dispatchEvent(
+          new CustomEvent("product-add", {
+            detail: id,
+            bubbles: true,
+          })
+        );
       }
 
-      if (target.closest('.carousel__arrow_right')) {
+      if (target.closest(".carousel__arrow_right")) {
         this.next();
       }
 
-      if (target.closest('.carousel__arrow_left')) {
+      if (target.closest(".carousel__arrow_left")) {
         this.prev();
       }
     };
@@ -82,19 +85,18 @@ export default class Carousel {
 
   update() {
     let offset = -this.elem.offsetWidth * this.currentSlideNumber;
-    this.sub('inner').style.transform = `translateX(${offset}px)`;
+    this.sub("inner").style.transform = `translateX(${offset}px)`;
 
     if (this.currentSlideNumber == this.slides.length - 1) {
-      this.sub('arrow_right').style.display = 'none';
+      this.sub("arrow_right").style.display = "none";
     } else {
-      this.sub('arrow_right').style.display = '';
+      this.sub("arrow_right").style.display = "";
     }
 
     if (this.currentSlideNumber == 0) {
-      this.sub('arrow_left').style.display = 'none';
+      this.sub("arrow_left").style.display = "none";
     } else {
-      this.sub('arrow_left').style.display = '';
+      this.sub("arrow_left").style.display = "";
     }
   }
-
 }

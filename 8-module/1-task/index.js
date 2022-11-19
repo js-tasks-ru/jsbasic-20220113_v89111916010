@@ -1,10 +1,11 @@
-import createElement from '../../assets/lib/create-element.js';
+import createElement from "../../assets/lib/create-element.js";
 
 export default class CartIcon {
   constructor() {
     this.render();
 
     this.addEventListeners();
+    this.oneTime = true;
   }
 
   render() {
@@ -13,12 +14,14 @@ export default class CartIcon {
 
   update(cart) {
     if (!cart.isEmpty()) {
-      this.elem.classList.add('cart-icon_visible');
+      this.elem.classList.add("cart-icon_visible");
 
       this.elem.innerHTML = `
         <div class="cart-icon__inner">
           <span class="cart-icon__count">${cart.getTotalCount()}</span>
-          <span class="cart-icon__price">€${cart.getTotalPrice().toFixed(2)}</span>
+          <span class="cart-icon__price">€${cart
+            .getTotalPrice()
+            .toFixed(2)}</span>
         </div>`;
 
       this.updatePosition();
@@ -79,7 +82,7 @@ export default class CartIcon {
   }
 
   addEventListeners() {
-    document.addEventListener('scroll', () => this.updatePosition());
-    window.addEventListener('resize', () => this.updatePosition());
+    document.addEventListener("scroll", () => this.updatePosition());
+    window.addEventListener("resize", () => this.updatePosition());
   }
 }
